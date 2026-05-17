@@ -6,17 +6,17 @@
 
 ## Features
 
-| Feature | |
-|---|---|
-| Situation input → title, tagline, and full multi-scene script | ✅ |
-| LLM agent with structured JSON output + extraction fallbacks | ✅ |
-| Scene index, description, dialogue, and music cues | ✅ |
-| Character cards with name, role, and traits | ✅ |
-| Mood selector — 6 moods (Dramatic, Romantic, Comedy, Action, Tragic, Thriller) | ✅ |
-| Regenerate title, characters, or scenes independently | ✅ |
-| History drawer — persisted across sessions | ✅ |
-| Shareable public link `/share/:id` | ✅ |
-| Skeleton loading states, error handling, fully responsive | ✅ |
+| Feature |
+|---|
+| Situation input → title, tagline, and full multi-scene script
+| LLM agent with structured JSON output + extraction fallbacks
+| Scene index, description, dialogue, and music cues
+| Character cards with name, role, and traits
+| Mood selector — 6 moods (Dramatic, Romantic, Comedy, Action, Tragic, Thriller)
+| Regenerate title, characters, or scenes independently
+| History drawer — persisted across sessions
+| Shareable public link `/share/:id`
+| Skeleton loading states, error handling, fully responsive
 
 ---
 
@@ -263,20 +263,5 @@ sequenceDiagram
     Client-->>Hook: updated script
     Hook->>Hook: setDrama(prev => merge script)
     Hook-->>UI: re-render with new section
-    UI-->>User: ✅ Section refreshed in place
+    UI-->>User: Section refreshed in place
 ```
-
----
-
-## Environment Variables
-
-| Variable | Required | Default | Description |
-|---|---|---|---|
-| `GROQ_API_KEY` | ✅ | — | Your Groq API key |
-| `GROQ_MODEL` | ❌ | `llama-3.3-70b-versatile` | Any Groq-supported model ID |
-
----
-
-## Deployment Notes
-
-The app is stateless and deploys to any Node.js host. On **Vercel** (and similar serverless platforms), the JSON storage automatically switches to `/tmp/` since the project root is read-only. Data in `/tmp/` is ephemeral per-instance — for durable history and share links across deployments, swap `db.ts` for a persistent store (e.g. Upstash Redis, Neon Postgres, or Vercel KV).
