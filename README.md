@@ -8,16 +8,16 @@
 
 | Feature | |
 |---|---|
-| Situation input → title + tagline + multi-scene script | ✅ |
-| LLM agent with structured JSON output + extraction fallbacks | ✅ |
-| Scene index, description, dialogue, music cues | ✅ |
-| Character cards (name, role, traits) | ✅ |
-| Scene mood selector (6 moods) | ✅ |
-| Regenerate title, characters, or scenes independently | ✅ |
-| History drawer (persisted to local JSON file) | ✅ |
-| Shareable public link `/share/:id` | ✅ |
-| Error handling (client + server) | ✅ |
-| Responsive UI | ✅ |
+| Situation input → title + tagline + multi-scene script 
+| LLM agent with structured JSON output + extraction fallbacks 
+| Scene index, description, dialogue, music cues 
+| Character cards (name, role, traits)
+| Scene mood selector (6 moods)
+| Regenerate title, characters, or scenes independently
+| History drawer (persisted to local JSON file)
+| Shareable public link `/share/:id`
+| Error handling (client + server)
+| Responsive UI
 
 ---
 

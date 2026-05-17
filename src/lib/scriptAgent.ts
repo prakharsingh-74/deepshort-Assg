@@ -1,15 +1,8 @@
 import type { Script, Mood, RegenerateSection, Character, Scene } from '@/types';
 
-const OPENROUTER_URL = 'https://openrouter.ai/api/v1/chat/completions';
+const GROQ_URL = 'https://api.groq.com/openai/v1/chat/completions';
 
-// Tried in order — skipped automatically on 429 rate-limit
-const FALLBACK_MODELS: string[] = [
-  process.env.OPENROUTER_MODEL ?? 'google/gemma-4-31b-it:free',
-  'nvidia/nemotron-3-super-120b-a12b:free',
-  'openai/gpt-4o-mini:free',
-  'meta-llama/llama-4-scout:free',
-  'mistralai/mistral-small-3.1-24b-instruct:free',
-];
+const GROQ_MODEL = process.env.GROQ_MODEL ?? 'llama-3.3-70b-versatile';
 
 const MOOD_DESCRIPTIONS: Record<Mood, string> = {
   dramatic: 'Over-the-top Bollywood masala — intense emotions, slow-motion hero walks, thunderclap sound effects, destiny speeches',
@@ -127,56 +120,40 @@ function validateAndFix(data: unknown): Script {
 }
 
 async function callLLM(messages: LLMMessage[], maxTokens = 4000): Promise<string> {
-  const key = process.env.OPENROUTER_API_KEY;
-  if (!key) throw new Error('OPENROUTER_API_KEY is not set. Add it to .env.local');
+  const key = process.env.GROQ_API_KEY;
+  if (!key) throw new Error('GROQ_API_KEY is not set. Add it to .env.local');
 
-  let lastError: Error | undefined;
-
-  for (const model of FALLBACK_MODELS) {
-    let res: Response;
-    try {
-      res = await fetch(OPENROUTER_URL, {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${key}`,
-          'Content-Type': 'application/json',
-          'HTTP-Referer': 'http://localhost:3000',
-          'X-Title': 'Bollywood Script Generator',
-        },
-        body: JSON.stringify({ model, messages, temperature: 0.9, max_tokens: maxTokens }),
-        // Disable Next.js fetch caching for this API call
-        cache: 'no-store',
-      });
-    } catch (fetchErr) {
-      const cause = fetchErr instanceof Error ? fetchErr.message : String(fetchErr);
-      console.error(`[scriptAgent] Network error reaching OpenRouter:`, cause);
-      throw new Error(
-        `Network error: could not reach openrouter.ai. ` +
-        `Check your internet connection. Details: ${cause}`
-      );
-    }
-
-    if (res.status === 429) {
-      const errText = await res.text();
-      console.warn(`[scriptAgent] Model ${model} rate-limited, trying next...`);
-      lastError = new Error(`OpenRouter API error (429): ${errText}`);
-      continue;
-    }
-
-    if (!res.ok) {
-      const err = await res.text();
-      throw new Error(`OpenRouter API error (${res.status}): ${err}`);
-    }
-
-    const data = await res.json() as { choices?: { message?: { content?: string } }[] };
-    const content = data.choices?.[0]?.message?.content;
-    if (!content) throw new Error('Empty response from LLM');
-
-    if (model !== FALLBACK_MODELS[0]) console.log(`[scriptAgent] Used fallback model: ${model}`);
-    return content;
+  let res: Response;
+  try {
+    res = await fetch(GROQ_URL, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${key}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: GROQ_MODEL,
+        messages,
+        temperature: 0.9,
+        max_tokens: maxTokens,
+      }),
+      cache: 'no-store',
+    });
+  } catch (fetchErr) {
+    const cause = fetchErr instanceof Error ? fetchErr.message : String(fetchErr);
+    throw new Error(`Network error: could not reach api.groq.com. Check your internet connection. Details: ${cause}`);
   }
 
-  throw lastError ?? new Error('All models are currently rate-limited. Please try again in a moment.');
+  if (!res.ok) {
+    const err = await res.text();
+    throw new Error(`Groq API error (${res.status}): ${err}`);
+  }
+
+  const data = await res.json() as { choices?: { message?: { content?: string } }[] };
+  const content = data.choices?.[0]?.message?.content;
+  if (!content) throw new Error('Empty response from Groq');
+
+  return content;
 }
 
 export async function generateScript(situation: string, mood: Mood): Promise<Script> {
