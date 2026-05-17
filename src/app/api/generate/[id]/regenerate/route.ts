@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { regenerateSection } from '@/lib/scriptAgent';
-import { getDramaById, updateDrama } from '@/lib/db';
+import { getDramaById, updateDramaScript } from '@/lib/db';
 import type { RegenerateSection, Script } from '@/types';
 
 const VALID_SECTIONS: RegenerateSection[] = ['title', 'characters', 'scenes'];
@@ -12,7 +12,10 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
     const section = (body.section ?? 'scenes') as RegenerateSection;
 
     if (!VALID_SECTIONS.includes(section))
-      return NextResponse.json({ error: `Section must be one of: ${VALID_SECTIONS.join(', ')}` }, { status: 400 });
+      return NextResponse.json(
+        { error: `Section must be one of: ${VALID_SECTIONS.join(', ')}` },
+        { status: 400 },
+      );
 
     const drama = getDramaById(id);
     if (!drama) return NextResponse.json({ error: 'Drama not found' }, { status: 404 });
@@ -29,11 +32,14 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
       updatedScript.scenes = partial.scenes;
     }
 
-    updateDrama(id, { title: updatedScript.title, tagline: updatedScript.tagline, scriptJson: updatedScript });
+    updateDramaScript(id, updatedScript);
 
     return NextResponse.json({ id, script: updatedScript });
   } catch (err) {
     console.error('[POST /api/generate/:id/regenerate]', err instanceof Error ? err.message : err);
-    return NextResponse.json({ error: err instanceof Error ? err.message : 'Failed to regenerate section' }, { status: 500 });
+    return NextResponse.json(
+      { error: err instanceof Error ? err.message : 'Failed to regenerate section' },
+      { status: 500 },
+    );
   }
 }

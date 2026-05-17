@@ -1,4 +1,4 @@
-import type { Drama, DramaSummary } from '@/types';
+import type { Drama, DramaSummary, Mood, RegenerateSection, Script } from '@/types';
 
 async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   const res = await fetch(`/api${path}`, {
@@ -6,29 +6,20 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
     ...options,
   });
   const data = await res.json() as T & { error?: string };
-  if (!res.ok) throw new Error((data as { error?: string }).error ?? `Request failed with status ${res.status}`);
+  if (!res.ok) throw new Error(data.error ?? `Request failed with status ${res.status}`);
   return data;
-}
-
-interface GenerateResponse {
-  id: string;
-  shareId: string;
-  situation: string;
-  mood: string;
-  script: Drama['script'];
-  createdAt?: string;
 }
 
 interface RegenerateResponse {
   id: string;
-  script: Drama['script'];
+  script: Script;
 }
 
 export const api = {
-  generate: (situation: string, mood: string): Promise<GenerateResponse> =>
-    request<GenerateResponse>('/generate', { method: 'POST', body: JSON.stringify({ situation, mood }) }),
+  generate: (situation: string, mood: Mood): Promise<Drama> =>
+    request<Drama>('/generate', { method: 'POST', body: JSON.stringify({ situation, mood }) }),
 
-  regenerate: (id: string, section: string): Promise<RegenerateResponse> =>
+  regenerate: (id: string, section: RegenerateSection): Promise<RegenerateResponse> =>
     request<RegenerateResponse>(`/generate/${id}/regenerate`, { method: 'POST', body: JSON.stringify({ section }) }),
 
   history: (): Promise<DramaSummary[]> =>

@@ -21,10 +21,11 @@ export function useScript(): UseScriptReturn {
   const [regenerating, setRegenerating] = useState(false);
 
   const generate = useCallback(async (situation: string, mood: Mood): Promise<Drama> => {
-    setLoading(true); setError(null); setDramaState(null);
+    setLoading(true);
+    setError(null);
+    setDramaState(null);
     try {
-      const data = await api.generate(situation, mood);
-      const drama: Drama = { ...data, mood: data.mood as Mood, createdAt: data.createdAt ?? new Date().toISOString() };
+      const drama = await api.generate(situation, mood);
       setDramaState(drama);
       return drama;
     } catch (err) {
@@ -37,10 +38,11 @@ export function useScript(): UseScriptReturn {
   }, []);
 
   const regenerate = useCallback(async (id: string, section: RegenerateSection): Promise<void> => {
-    setRegenerating(true); setError(null);
+    setRegenerating(true);
+    setError(null);
     try {
-      const data = await api.regenerate(id, section);
-      setDramaState(prev => prev ? { ...prev, script: data.script } : prev);
+      const { script } = await api.regenerate(id, section);
+      setDramaState(prev => prev ? { ...prev, script } : prev);
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Unknown error';
       setError(msg);
@@ -59,7 +61,7 @@ interface UseHistoryReturn {
   history: DramaSummary[];
   loadingHistory: boolean;
   fetchHistory: () => Promise<void>;
-  addToHistory: (item: Drama) => void;
+  addToHistory: (drama: Drama) => void;
 }
 
 export function useHistory(): UseHistoryReturn {
@@ -68,16 +70,26 @@ export function useHistory(): UseHistoryReturn {
 
   const fetchHistory = useCallback(async (): Promise<void> => {
     setLoadingHistory(true);
-    try { setHistory(await api.history()); } catch {}
-    finally { setLoadingHistory(false); }
+    try {
+      setHistory(await api.history());
+    } catch {
+      // History is non-critical — silently fail so it doesn't block the main flow
+    } finally {
+      setLoadingHistory(false);
+    }
   }, []);
 
-  const addToHistory = useCallback((item: Drama): void => {
+  const addToHistory = useCallback((drama: Drama): void => {
     const entry: DramaSummary = {
-      id: item.id, shareId: item.shareId, situation: item.situation, mood: item.mood,
-      title: item.script.title, tagline: item.script.tagline, createdAt: new Date().toISOString(),
+      id: drama.id,
+      shareId: drama.shareId,
+      situation: drama.situation,
+      mood: drama.mood,
+      title: drama.script.title,
+      tagline: drama.script.tagline,
+      createdAt: drama.createdAt,
     };
-    setHistory(h => [entry, ...h.filter(x => x.id !== item.id)]);
+    setHistory(prev => [entry, ...prev.filter(x => x.id !== drama.id)]);
   }, []);
 
   return { history, loadingHistory, fetchHistory, addToHistory };

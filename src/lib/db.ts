@@ -1,18 +1,22 @@
 import path from 'path';
 import fs from 'fs';
-import type { Drama, DramaRecord, DramaSummary, Mood, Script } from '@/types';
+import type { Drama, DramaSummary, Script } from '@/types';
 
 const DATA_DIR = path.join(process.cwd(), 'data');
 const DB_PATH = path.join(DATA_DIR, 'dramas.json');
 
 interface DBShape {
-  dramas: DramaRecord[];
+  dramas: Drama[];
 }
 
 function readDB(): DBShape {
   try {
-    if (fs.existsSync(DB_PATH)) return JSON.parse(fs.readFileSync(DB_PATH, 'utf8')) as DBShape;
-  } catch {}
+    if (fs.existsSync(DB_PATH)) {
+      return JSON.parse(fs.readFileSync(DB_PATH, 'utf8')) as DBShape;
+    }
+  } catch (err) {
+    console.error('[db] Failed to parse database file, starting fresh:', err);
+  }
   return { dramas: [] };
 }
 
@@ -21,51 +25,36 @@ function writeDB(data: DBShape): void {
   fs.writeFileSync(DB_PATH, JSON.stringify(data, null, 2), 'utf8');
 }
 
-interface InsertDramaParams {
-  id: string;
-  shareId: string;
-  situation: string;
-  mood: Mood;
-  title: string;
-  tagline: string;
-  scriptJson: Script;
-}
-
-export function insertDrama({ id, shareId, situation, mood, title, tagline, scriptJson }: InsertDramaParams): void {
+export function insertDrama(drama: Drama): void {
   const db = readDB();
-  db.dramas.unshift({ id, shareId, situation, mood, title, tagline, script: scriptJson, createdAt: new Date().toISOString() });
+  db.dramas.unshift(drama);
   writeDB(db);
 }
 
-interface UpdateDramaParams {
-  title: string;
-  tagline: string;
-  scriptJson: Script;
-}
-
-export function updateDrama(id: string, { title, tagline, scriptJson }: UpdateDramaParams): void {
+export function updateDramaScript(id: string, script: Script): void {
   const db = readDB();
   const idx = db.dramas.findIndex(d => d.id === id);
   if (idx !== -1) {
-    db.dramas[idx] = { ...db.dramas[idx], title, tagline, script: scriptJson };
+    db.dramas[idx] = { ...db.dramas[idx], script };
     writeDB(db);
   }
 }
 
 export function getDramaById(id: string): Drama | null {
-  const record = readDB().dramas.find(d => d.id === id);
-  return record ?? null;
+  return readDB().dramas.find(d => d.id === id) ?? null;
 }
 
 export function getDramaByShareId(shareId: string): Drama | null {
-  const record = readDB().dramas.find(d => d.shareId === shareId);
-  return record ?? null;
+  return readDB().dramas.find(d => d.shareId === shareId) ?? null;
 }
 
 export function getAllDramas(limit = 50): DramaSummary[] {
   return readDB()
     .dramas.slice(0, limit)
-    .map(({ id, shareId, situation, mood, title, tagline, createdAt }) => ({
-      id, shareId, situation, mood, title, tagline, createdAt,
+    .map(({ id, shareId, situation, mood, script, createdAt }) => ({
+      id, shareId, situation, mood,
+      title: script.title,
+      tagline: script.tagline,
+      createdAt,
     }));
 }

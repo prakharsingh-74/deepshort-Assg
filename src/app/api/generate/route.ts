@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { v4 as uuidv4 } from 'uuid';
 import { generateScript } from '@/lib/scriptAgent';
 import { insertDrama } from '@/lib/db';
-import type { Mood } from '@/types';
+import type { Drama, Mood } from '@/types';
 
 const VALID_MOODS: Mood[] = ['dramatic', 'romantic', 'comedy', 'action', 'tragic', 'thriller'];
 
@@ -21,14 +21,24 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: `Mood must be one of: ${VALID_MOODS.join(', ')}` }, { status: 400 });
 
     const script = await generateScript(situation.trim(), mood as Mood);
-    const id = uuidv4();
-    const shareId = uuidv4().replace(/-/g, '').slice(0, 12);
 
-    insertDrama({ id, shareId, situation: situation.trim(), mood: mood as Mood, title: script.title, tagline: script.tagline, scriptJson: script });
+    const drama: Drama = {
+      id: uuidv4(),
+      shareId: uuidv4().replace(/-/g, '').slice(0, 12),
+      situation: situation.trim(),
+      mood: mood as Mood,
+      script,
+      createdAt: new Date().toISOString(),
+    };
 
-    return NextResponse.json({ id, shareId, situation: situation.trim(), mood, script });
+    insertDrama(drama);
+
+    return NextResponse.json(drama);
   } catch (err) {
     console.error('[POST /api/generate]', err instanceof Error ? err.message : err);
-    return NextResponse.json({ error: err instanceof Error ? err.message : 'Failed to generate script' }, { status: 500 });
+    return NextResponse.json(
+      { error: err instanceof Error ? err.message : 'Failed to generate script' },
+      { status: 500 },
+    );
   }
 }

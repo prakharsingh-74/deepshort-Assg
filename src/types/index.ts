@@ -50,15 +50,3 @@ export interface DramaSummary {
   tagline: string;
   createdAt: string;
 }
-
-// Raw shape stored in dramas.json
-export interface DramaRecord {
-  id: string;
-  shareId: string;
-  situation: string;
-  mood: Mood;
-  title: string;
-  tagline: string;
-  script: Script;
-  createdAt: string;
-}
