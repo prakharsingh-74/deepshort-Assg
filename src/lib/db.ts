@@ -2,7 +2,8 @@ import path from 'path';
 import fs from 'fs';
 import type { Drama, DramaSummary, Script } from '@/types';
 
-const DATA_DIR = path.join(process.cwd(), 'data');
+// Vercel Lambda root (/var/task) is read-only; /tmp is the only writable dir in serverless environments
+const DATA_DIR = process.env.VERCEL ? '/tmp' : path.join(process.cwd(), 'data');
 const DB_PATH = path.join(DATA_DIR, 'dramas.json');
 
 interface DBShape {
@@ -21,7 +22,9 @@ function readDB(): DBShape {
 }
 
 function writeDB(data: DBShape): void {
-  if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
+  if (!process.env.VERCEL && !fs.existsSync(DATA_DIR)) {
+    fs.mkdirSync(DATA_DIR, { recursive: true });
+  }
   fs.writeFileSync(DB_PATH, JSON.stringify(data, null, 2), 'utf8');
 }
 
