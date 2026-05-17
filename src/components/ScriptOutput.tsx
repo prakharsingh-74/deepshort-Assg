@@ -1,12 +1,10 @@
 'use client';
 
-import { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { RefreshCw, Share2, Users, Clapperboard } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { RefreshCw, Users, Clapperboard } from 'lucide-react';
 import toast from 'react-hot-toast';
 import CharacterCard from './CharacterCard';
 import SceneCard from './SceneCard';
-import ShareModal from './ShareModal';
 import type { Drama, RegenerateSection } from '@/types';
 
 const MOOD_EMOJIS: Record<string, string> = {
@@ -20,8 +18,7 @@ interface ScriptOutputProps {
 }
 
 export default function ScriptOutput({ drama, regenerating, onRegenerate }: ScriptOutputProps) {
-  const [showShare, setShowShare] = useState(false);
-  const { id, shareId, situation, mood, script } = drama;
+  const { id, situation, mood, script } = drama;
 
   const handleRegen = async (section: RegenerateSection) => {
     const labels: Record<RegenerateSection, string> = {
@@ -51,11 +48,9 @@ export default function ScriptOutput({ drama, regenerating, onRegenerate }: Scri
         transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
         className="relative rounded-2xl border border-white/7 bg-[#111115] overflow-hidden"
       >
-        {/* Subtle amber glow top */}
         <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-amber-500/30 to-transparent" />
 
         <div className="px-6 py-8 text-center space-y-3">
-          {/* Context pill */}
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-white/7 bg-white/3 text-2xs text-ink-3">
             <span>{MOOD_EMOJIS[mood] ?? '🎬'}</span>
             <span className="capitalize">{mood}</span>
@@ -70,22 +65,14 @@ export default function ScriptOutput({ drama, regenerating, onRegenerate }: Scri
             &ldquo;{script.tagline}&rdquo;
           </p>
 
-          {/* Action row */}
-          <div className="flex items-center justify-center gap-2.5 pt-2 flex-wrap">
+          <div className="pt-2">
             <button
               onClick={() => handleRegen('title')}
               disabled={regenerating}
-              className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-medium border border-white/7 bg-white/3 text-ink-3 hover:text-ink-1 hover:bg-white/6 transition-all disabled:opacity-40"
+              className="flex items-center gap-1.5 mx-auto px-3.5 py-1.5 rounded-lg text-xs font-medium border border-white/7 bg-white/3 text-ink-3 hover:text-ink-1 hover:bg-white/6 transition-all disabled:opacity-40"
             >
               <RefreshCw size={11} className={regenerating ? 'animate-spin' : ''} />
               New Title
-            </button>
-            <button
-              onClick={() => setShowShare(true)}
-              className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-semibold border border-amber-500/35 bg-amber-500/10 text-amber-400 hover:bg-amber-500/18 transition-all"
-            >
-              <Share2 size={11} />
-              Share
             </button>
           </div>
         </div>
@@ -141,12 +128,6 @@ export default function ScriptOutput({ drama, regenerating, onRegenerate }: Scri
           </div>
         </section>
       )}
-
-      <AnimatePresence>
-        {showShare && (
-          <ShareModal shareId={shareId} title={script.title} onClose={() => setShowShare(false)} />
-        )}
-      </AnimatePresence>
     </motion.div>
   );
 }
