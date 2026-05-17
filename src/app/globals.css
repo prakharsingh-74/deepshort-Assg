@@ -1,0 +1,74 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  *, *::before, *::after { box-sizing: border-box; }
+
+  html {
+    /* Crisp text rendering — what Google/Meta ship */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    background-color: #0c0c0f;
+    color: rgba(240, 240, 245, 0.92);
+    font-family: 'Inter', system-ui, sans-serif;
+    min-height: 100vh;
+    line-height: 1.6;
+  }
+
+  /* Thin, amber-tinted scrollbar */
+  ::-webkit-scrollbar       { width: 3px; height: 3px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: rgba(245,158,11,0.25); border-radius: 99px; }
+  ::-webkit-scrollbar-thumb:hover { background: rgba(245,158,11,0.45); }
+
+  /* Consistent focus ring */
+  :focus-visible {
+    outline: 2px solid rgba(245,158,11,0.6);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+}
+
+@layer utilities {
+  .font-display { font-family: 'Cinzel', serif; }
+
+  /* Gold gradient text — used only for movie title */
+  .text-gold-gradient {
+    background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 40%, #fbbf24 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* Skeleton shimmer used for loading states */
+  .skeleton {
+    background: linear-gradient(
+      90deg,
+      rgba(255,255,255,0.04) 0%,
+      rgba(255,255,255,0.08) 50%,
+      rgba(255,255,255,0.04) 100%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.6s linear infinite;
+    border-radius: 6px;
+  }
+
+  /* Surface utility classes */
+  .surface-1 { background: #111115; }
+  .surface-2 { background: #18181d; }
+
+  /* Divider line */
+  .divider {
+    height: 1px;
+    background: rgba(255,255,255,0.07);
+  }
+
+  /* Truncate to n lines */
+  .line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .line-clamp-3 { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+}
