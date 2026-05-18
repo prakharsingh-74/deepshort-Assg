@@ -14,9 +14,8 @@
 | Character cards with name, role, and traits
 | Mood selector — 6 moods (Dramatic, Romantic, Comedy, Action, Tragic, Thriller)
 | Regenerate title, characters, or scenes independently
-| History drawer — persisted across sessions
-| Shareable public link `/share/:id`
-| Skeleton loading states, error handling, fully responsive
+| History drawer — persisted across sessions |
+| Skeleton loading states, error handling, fully responsive |
 
 ---
 
@@ -40,13 +39,11 @@ src/
 │   ├── layout.tsx                       # Root layout — fonts, Toaster
 │   ├── page.tsx                         # Home page
 │   ├── globals.css                      # Design tokens, skeleton animation
-│   ├── share/[shareId]/page.tsx         # Public share page
 │   └── api/
 │       ├── generate/route.ts            # POST /api/generate
 │       ├── generate/[id]/regenerate/    # POST /api/generate/:id/regenerate
 │       ├── history/route.ts             # GET  /api/history
-│       ├── history/[id]/route.ts        # GET  /api/history/:id
-│       └── share/[shareId]/route.ts     # GET  /api/share/:shareId
+│       └── history/[id]/route.ts        # GET  /api/history/:id
 ├── lib/
 │   ├── scriptAgent.ts                   # Groq LLM agent — prompt + JSON parsing
 │   ├── db.ts                            # JSON file storage (local or /tmp)
@@ -59,9 +56,7 @@ src/
 │   ├── ScriptSkeleton.tsx               # Shimmer skeleton while generating
 │   ├── SceneCard.tsx
 │   ├── CharacterCard.tsx
-│   ├── HistoryPanel.tsx
-│   ├── ShareModal.tsx
-│   └── SharedView.tsx
+│   └── HistoryPanel.tsx
 └── types/
     └── index.ts                         # Shared domain types
 ```
@@ -132,8 +127,6 @@ graph TD
         C2["ScriptOutput"]
         C3["SceneCard / CharacterCard"]
         C4["HistoryPanel"]
-        C5["ShareModal"]
-        SV["SharedView\n/share/:id"]
     end
 
     subgraph NextJS["⚡ Next.js — Single Deployment"]
@@ -142,7 +135,6 @@ graph TD
             R2["POST /api/generate/:id/regenerate"]
             R3["GET  /api/history"]
             R4["GET  /api/history/:id"]
-            R5["GET  /api/share/:shareId"]
         end
 
         subgraph Lib["src/lib/"]
@@ -161,7 +153,6 @@ graph TD
     AC -->|"POST {section}"| R2
     AC -->|GET| R3
     AC -->|GET| R4
-    AC -->|GET| R5
 
     R1 --> Agent -->|chat/completions| Groq
     R2 --> Agent
@@ -171,10 +162,8 @@ graph TD
     R2 --> DB
     R3 --> DB
     R4 --> DB
-    R5 --> DB
 
-    C1 & C2 & C3 & C4 & C5 --- UI
-    SV -->|GET| R5
+    C1 & C2 & C3 & C4 --- UI
 ```
 
 ---
