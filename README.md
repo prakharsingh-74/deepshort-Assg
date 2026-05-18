@@ -136,7 +136,7 @@ graph TD
         SV["SharedView\n/share/:id"]
     end
 
-    subgraph NextJS["⚡ Next.js 14 — Single Deployment"]
+    subgraph NextJS["⚡ Next.js — Single Deployment"]
         subgraph API["App Router — API Route Handlers"]
             R1["POST /api/generate"]
             R2["POST /api/generate/:id/regenerate"]
